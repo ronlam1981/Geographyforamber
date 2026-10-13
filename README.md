@@ -21,3 +21,7 @@ GitHub Pages以main分支根目錄發布。純靜態HTML、CSS與JS，無建置�
 ## 新增題庫
 
 家長在學習記錄頁匯入JSON題目陣列。每題須有chapter（territory/population/ethnic/terrain）、type（mc/fill/short）、q、answer、explanation。選擇題另需4個options，answer為0至3；簡答可另加points要點陣列；填空可加aliases同義寫法陣列。
+
+## 音效及動畫
+
+音效初次使用預設開啟；可靜音及調整音量，設定保存在本機。首次點擊後啟用瀏覽器音效。提供答對音階、答錯提示、點擊與地圖聚焦音、回合完成／滿分旋律，配合彩花、震動、脈衝高亮及提示。遵從系統減少動態效果設定；未加入背景音樂、外部音效下載或追蹤服務。
