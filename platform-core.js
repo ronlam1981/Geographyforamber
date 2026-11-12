@@ -1,8 +1,22 @@
 /* Bank model, backward compatible local data, and activity records. */
-const BASE_BANK_ID='geo-20261014';let currentBank=BASE_BANK_ID,activity=null,visit=null,practiceRound=null,practiceViewQ=null,reviewItems=[],reviewAt=0,editingId=null;
+const BASE_BANK_ID='geo-20261014', FIRST_TERM_ID='geo-20261114';let currentBank=BASE_BANK_ID,activity=null,visit=null,practiceRound=null,practiceViewQ=null,reviewItems=[],reviewAt=0,editingId=null;
 function initializeBanks(){db.banks??={};if(!db.banks[BASE_BANK_ID]){db.banks[BASE_BANK_ID]={id:BASE_BANK_ID,name:'初二上冊｜10月14日小測',term:'上冊',examDate:'2026-10-14',description:'從世界看中國＋地形與地勢',questions:QUESTIONS.map(q=>({...q})).concat(db.custom||[]),lessons:LESSONS.map(l=>({...l,cards:l.cards.map(c=>[...c])})),maps:MAP_ITEMS.map(m=>({...m})),minutes:25,source:'家長提供的工作紙及教材範圍',builtin:true};db.custom=[]}
+if(!db.banks[FIRST_TERM_ID]){
+const copy=x=>JSON.parse(JSON.stringify(x)), bank=copy(FIRST_TERM_BANK);
+const extras=new Map(bank.lessons.map(l=>[l.id,l]));
+bank.lessons=[...copy(LESSONS).map(l=>{const e=extras.get(l.id);extras.delete(l.id);
+if(l.id==='territory')l.cards=l.cards.filter(c=>c[0]!=='行政區與鄰國');
+if(l.id==='population')l.cards=l.cards.map(c=>[c[0],c[1].replace('本次小測','本卷')]);
+return e?{...e,cards:[...l.cards,...e.cards]}:l;
+}),...extras.values()];
+bank.questions=[...copy(QUESTIONS).map(q=>({...q,id:FIRST_TERM_ID+':'+q.id})),...bank.questions];
+bank.maps=[...copy(MAP_ITEMS).map(m=>({...m,id:FIRST_TERM_ID+':'+m.id})),...bank.maps];
+db.banks[FIRST_TERM_ID]=bank;
+}
 for(const [id,name,term]of [['geo-upper','初二上冊｜其他測驗','上冊'],['geo-lower','初二下冊｜待加题','下冊']])if(!db.banks[id])db.banks[id]={id,name,term,examDate:'',description:'等待加入新教材與題目',questions:[],lessons:[{id:'general',icon:'📘',name:'綜合',intro:'家長加入教材後可開始複習。',cards:[]}],maps:[],minutes:25,source:'待加入教材'};
-currentBank=db.selectedBank&&db.banks[db.selectedBank]?db.selectedBank:BASE_BANK_ID;db.selectedBank=currentBank;db.schema=2;db.activities??={};db.visits??={};for(const p of Object.values(db.users)){p.notesDone??={};p.logs??=[];p.wrong??=[];p.progress??={};p.logs.forEach(l=>l.bankId??=BASE_BANK_ID)}if(db.activeExam){db.activeExam.bankId??=BASE_BANK_ID;db.activeExam.objectiveMax??=80;db.activeExam.shortMax??=20;db.activeExam.minutes??=25}if(db.lastExam){db.lastExam.bankId??=BASE_BANK_ID;db.lastExam.objectiveMax??=80;db.lastExam.shortMax??=20;db.lastExam.minutes??=25}}
+const requested=new URLSearchParams(location.search).get('bank');
+currentBank=db.activeExam&&db.banks[db.activeExam.bankId||BASE_BANK_ID]?(db.activeExam.bankId||BASE_BANK_ID):
+requested===FIRST_TERM_ID?FIRST_TERM_ID:db.selectedBank&&db.banks[db.selectedBank]?db.selectedBank:FIRST_TERM_ID;db.selectedBank=currentBank;db.schema=2;db.activities??={};db.visits??={};for(const p of Object.values(db.users)){p.notesDone??={};p.logs??=[];p.wrong??=[];p.progress??={};p.logs.forEach(l=>l.bankId??=BASE_BANK_ID)}if(db.activeExam){db.activeExam.bankId??=BASE_BANK_ID;db.activeExam.objectiveMax??=80;db.activeExam.shortMax??=20;db.activeExam.minutes??=25}if(db.lastExam){db.lastExam.bankId??=BASE_BANK_ID;db.lastExam.objectiveMax??=80;db.lastExam.shortMax??=20;db.lastExam.minutes??=25}}
 function getBank(){return db.banks[currentBank]||db.banks[BASE_BANK_ID]}
 function activeLessons(){return getBank().lessons||[]}
 function bankQuestions(){return getBank().questions||[]}
